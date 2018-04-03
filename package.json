@@ -1,0 +1,15 @@
+{
+  "name": "regular-redux-util",
+  "version": "1.0.0",
+  "description": "regularjs X redux",
+  "main": "index.js",
+  "dependencies": {
+    "immutable": "^3.8.2",
+    "redux": "3.7.2",
+    "redux-logger": "3.0.6"
+  },
+  "devDependencies": {},
+  "scripts": {},
+  "author": "tianyn1990",
+  "license": "MIT"
+}
