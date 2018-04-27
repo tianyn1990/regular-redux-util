@@ -1,6 +1,6 @@
 {
   "name": "regular-redux-util",
-  "version": "1.0.7",
+  "version": "1.0.8-0",
   "description": "regularjs X redux",
   "main": "index.js",
   "dependencies": {
