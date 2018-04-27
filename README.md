@@ -10,6 +10,7 @@ regularjs X redux
 ```javascript
 const ReduxUtil = require('regular-redux-util');
 
+
 // 外层组件 
 let WrapperComponent = BaseComponent.extend({
   // ...
