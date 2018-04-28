@@ -18,7 +18,7 @@
     "babel": "babel ./src --out-dir ./dist",
     "build": "webpack -p",
     "prepublish": "npm run babel",
-    "postpublish": "npm run webpack"
+    "postpublish": "npm run build"
   },
   "author": "tianyn1990",
   "license": "MIT"
