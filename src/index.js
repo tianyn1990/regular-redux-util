@@ -8,10 +8,6 @@ let StoreProvider = require('./connector/store-provider');
 let thunkMiddleware = require('./middlewares/thunk');
 let promiseMiddleware = require('./middlewares/promise');
 
-if(!u) return;
-
-var a;
-
 module.exports = {
     Immutable,
     fromJS: Immutable.fromJS,

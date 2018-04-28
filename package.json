@@ -32,7 +32,7 @@
     "precommit": "lint-staged"
   },
   "lint-staged": {
-    "src/main/resources/pc/src/javascript/**/*.js": [
+    "src/**/*.js": [
       "eslint --fix",
       "git add"
     ]
