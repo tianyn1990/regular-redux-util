@@ -10,16 +10,29 @@
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
+    "eslint": "^4.19.1",
+    "eslint-config-standard": "^11.0.0",
+    "eslint-plugin-promise": "^3.7.0",
+    "eslint-plugin-standard": "^3.1.0",
+    "husky": "^0.14.3",
+    "lint-staged": "^7.0.5",
     "webpack": "^4.6.0",
     "webpack-cli": "^2.0.15"
   },
   "scripts": {
+    "eslint": "",
     "babel": "babel ./src --out-dir ./dist --presets=es2015",
     "babel:watch": "babel ./src --watch --out-dir ./dist --source-maps --presets=es2015",
     "build": "webpack --mode=production ./src/index.js -o ./dist/index.min.js",
     "dev": "npm run babel:watch",
     "prepublish": "npm run babel",
     "postpublish": "npm run build"
+  },
+  "lint-staged": {
+    "src/main/resources/pc/src/javascript/**/*.js": [
+      "eslint --fix",
+      "git add"
+    ]
   },
   "repository": {
     "type": "git",
