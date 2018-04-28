@@ -33,10 +33,6 @@ function addMiddleware(middlewares, isCombineReducer, isDev) {
     if (u.isFunction(middlewares)) {
         middlewares = [middlewares];
     }
-    var a = !middlewares;
-    if(a) {
-        return;
-    }
 
     // 如果没有传中间件，则在序列头部，默认添加自己实现的promise中间件
     if (!middlewares.length) {
