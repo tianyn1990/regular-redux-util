@@ -1,5 +1,16 @@
 .idea/
 .vscode/
 .settings/
+logs/
+npm-debug.log
+yarn-error.log
 node_modules/
+package-lock.json
+yarn.lock
+coverage/
+run/
+.DS_Store
+*.sw*
+*.un~
+
 src/
