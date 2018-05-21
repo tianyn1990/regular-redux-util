@@ -1,4 +1,8 @@
-# regular-redux-util
+# regular-redux-util [![npm][npm-image]][npm-url]
+
+[npm-image]: https://img.shields.io/npm/v/get-package-readme.svg
+[npm-url]: https://www.npmjs.com/package/regular-redux-util
+
 regularjs X redux
 
 ## 使用步骤
