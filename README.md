@@ -1,6 +1,6 @@
 # regular-redux-util [![npm][npm-image]][npm-url]
 
-[npm-image]: https://img.shields.io/npm/v/get-package-readme.svg
+[npm-image]: https://img.shields.io/npm/v/regular-redux-util.svg?style=flat
 [npm-url]: https://www.npmjs.com/package/regular-redux-util
 
 regularjs X redux
