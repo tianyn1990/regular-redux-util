@@ -8,10 +8,9 @@ regularjs X redux
 #### 1、创建 store
 
 ```javascript
-const ReduxUtil = require('regular-redux-util');
+import ReduxUtil from 'regular-redux-util';
 
-
-// 外层组件 
+// 外层组件
 let WrapperComponent = BaseComponent.extend({
   // ...
   config(data) {
@@ -67,7 +66,9 @@ WrapperComponent.use(ReduxUtil.StoreProvider);
 #### 1、创建普通的action
 
 ```javascript
-const ReduxUtil = require('regular-redux-util');
+// action-factory.js
+
+import ReduxUtil from 'regular-redux-util';
 
 // 方式一
 let actions;
@@ -84,6 +85,7 @@ const actionObj = {
 actions = ReduxUtil.createAction(actionObj);
 
 // 方式二
+let actions = ReduxUtil.createAction({});
 actions.add('updateAddress', address => { payload: address });
 
 ```
@@ -145,8 +147,8 @@ initAsyncDataService(query) {
 - api参考自：https://github.com/pburtchaell/redux-promise-middleware 5.x版
 - dispatch该action之后，会立即触发所绑定的reducer中的pedding
 - promise对象如果返回Promise.resolve，则触发所绑定的reducer中的fulfilled
-- promise对象如果返回Promise.reject，则触发所绑定的reducer中的fulfilled
-- 后面会介绍如何定义reducer，以及它的pedding、fulfilled、rejected
+- promise对象如果返回Promise.reject，则触发所绑定的reducer中的rejected
+- 后面会介绍如何定义reducer，以及pedding、fulfilled、rejected的reducer处理函数
 
 
 ### 三、reducer
@@ -154,14 +156,14 @@ initAsyncDataService(query) {
 #### 1、创建reducer，绑定action
 
 ```javascript
-const ReduxUtil = require('regular-redux-util');
+import ReduxUtil from 'regular-redux-util';
 
 // 之前创建的action
-const {
+import {
 	  changeImg, // 普通
     getAddress, // 异步
     initAsyncDataService // 异步
-} = require('../action-factory');
+} from '../action-factory';
 
 // reduer 实例
 let reducer = ReduxUtil.createReducer();
@@ -207,27 +209,26 @@ reducer.add([
 **reducer就是一个纯函数，为了更好的复用，可以在一个reducer中调用其他reducer**
 
 ```javascript
-const ReduxUtil = require('regular-redux-util');
+import ReduxUtil from 'regular-redux-util';
 
 // 之前创建的action
-const {
+import {
 	  changeImg, // 普通
     getAddress, // 异步
     initAsyncDataService // 异步
-} = require('../action-factory');
+} from '../action-factory';
 
 // ...
 
 // 异步数据获取成功
-reducer.add(initAsyncDataService.fulfilled, (state, action) => {
+reducer.add(initAsyncDataService.fulfilled, (state, action = {}) => {
   // ... bigImg, selectIndex
   
   // 切换主图
-  // 生成 changeImg 绑定的 reducer 的action对象
-  const changeImgAction = changeImg(bigImg, selectIndex);
   // 调用 changeImg 绑定的 reducer
   //  - 注意：返回值要赋值给 state，否则无法修改state的结果
-  state = reducer.exec(changeImg, state, changeImgAction);
+  //  - 第三个参数：{bigImg, selectIndex}，是传入到`changeImg`这个action的第二个参数（action对象）
+  state = reducer.exec(changeImg, state, {bigImg, selectIndex});
   
   // ...
   return state;
@@ -251,14 +252,14 @@ container组件，就是绑定了redux的regular组件。
 
 ```javascript
 
-const ReduxUtil = require('regular-redux-util');
-const {
+import ReduxUtil from 'regular-redux-util';
+import {
     initSyncData,
     getAddress,
     initAsyncData,
     triggerVidList,
     buyNow
-} = require('../action-factory');
+} from '../action-factory';
 
 ```
 
@@ -268,24 +269,26 @@ const {
 
 let Common = DetailComponent.extend({
     template,
-	  data: {
-  	  selVidList: [] // 已选择的sku
-	  },
+    data: {
+        selVidList: [] // 已选择的sku
+    },
     config() {},
     init() {
-      // dispatch一个action
-      this.initSyncData(window.__syncData || {});
     },
     //...
 });
+export default Comment;
 
 ```
 
 #### 3、将regular组件绑定到redux
 
+**修改`export default Comment;`**
+
 ```javascript
 
-module.exports = ReduxUtil.connect({
+// 组件对象 `Comment`
+export default ReduxUtil.connect({
     mapState(state) {
         // 已选择的sku
         let selVidList = state.getIn(['skuProps', 'selVidList']);
@@ -293,9 +296,9 @@ module.exports = ReduxUtil.connect({
             selVidList
         };
     },
-    // state改变后是否触发组件的刷新
+    // 【可选】state改变后是否触发组件的刷新
     listenStateChange: ['skuProps', 'async.goodsCouponList'],
-    // 绑定到this上的action
+    // 【可选】绑定到this上的action
     mapDispatch: [
         initSyncData,
         getAddress,
@@ -303,7 +306,8 @@ module.exports = ReduxUtil.connect({
         triggerVidList,
         buyNow
     ],
-	  options: {
+    //【可选】
+    options: {
         // 自动emit事件：
         // this.$emit('rdx-connected')
         // this.$emit('rdx-afterchanged')
@@ -317,17 +321,42 @@ module.exports = ReduxUtil.connect({
 ###### 参数解释：
 
 1. **mapState**：state改变后，将会执行所有组件的mapState函数。函数的参数是redux的state。函数的返回值`newMappedState`将会使用`newMappedState && Object.assign(this.data, newMappedState);`更新组件的data，并最终通过`this.$udpate()`更新组件的视图。注意，当使用不可变数据类型（disableImmutableJS: false）的时候，state是一个immutable对象。
-2. **listenStateChange**：mapState的模式会引起性能问题。因为reducer触发了state更新之后，会触发所有container组件的mapState，这是不合理的。因此可以通过`listenStateChange`参数来做一次筛选，只有当`listenStateChange`中的数据发生变化时，才会执行`mapState`函数。比如在上面的例子里，只有当`state.skuProps`或`state.async.goodsCouponList`发生改变的时候，才会执行`mapState`函数。
-3. **mapDispatch**：container组件的逻辑中，如果需要dispatch一个action，那么需要将这个action函数写到`mapDispatch`这个参数下面。比如`initSyncData`然后就可以通过`this.initSyncData(window.__syncData || {});`来dispatch这个action了。
-4. **options:{emit: boolean}**：emit参数默认为false。当emit设置为true的时候，会在cotainer组件的生命周期中，自动emit三个事件。
+2. **listenStateChange**：【该参数可选】mapState的模式可能会引起性能问题。因为reducer触发了state更新之后，会触发所有container组件的mapState。因此可以通过`listenStateChange`参数来做一次筛选，只有当`listenStateChange`中的数据发生变化时，才会执行`mapState`函数。比如在上面的例子里，只有当`state.skuProps`或`state.async.goodsCouponList`发生改变的时候，才会执行`mapState`函数。
+3. **mapDispatch**：【该参数可选】container组件中，如果需要dispatch一个action，那么需要将这个action函数写到`mapDispatch`这个参数下面。比如`initSyncData`然后就可以通过`this.initSyncData(window.__syncData || {});`来dispatch这个action了。**如果不使用`mapDispatch`参数，也可以直接适用`this.$dispatch`，见下文步骤4**。
+4. **options:{emit: boolean}**：【该参数可选】emit参数默认为false。当emit设置为true的时候，会在cotainer组件的生命周期中，自动emit三个事件。
    - **rdx-connected**：只触发一次，在首次`mapState`执行之后
    - **rdx-afterchanged**：每次执行`mapState`后都会触发
    - **rdx-injected**：只执行一次，当组件可以获取`this.$refs.xx`的之后触发。如果组件被实例化多次，也会被触发多次。
 
+#### 4、在组件中`dispatch action`
+
+```javascript
+
+// 方法一
+...
+init() {
+    // dispatch action
+    this.$dispatch(initSyncData(window.__syncData || {}));
+},
+...
+
+// 方法二
+//  如果在上一步`ReduxUtil.connect`中使用了mapDispatch
+//  并注册了`initSyncData`这个action，那么可以使用方法二，如下：
+...
+init() {
+    // dispatch action
+    this.initSyncData(window.__syncData || {});
+},
+...
+
+
+```
+
 ### 五、将container添加到外层组件
 
 ```javascript
-const Common = require('./redux-base/container/common');
+import Common from './redux-base/container/common';
 
 WrapperComponent.component('Common', Common);
 
